@@ -12,12 +12,13 @@ files = ['data/rap1-lieb-positives.txt','data/yeast-upstream-1k-negative.fa']
 allfileseqs = seqio.getseqs(files) # read in all the seqeunces
 positives, negatives = allfileseqs[0], allfileseqs[1]
 
-newnegs = list() #  get rid of negatives sequences that are also postiive sequences
-for seq in negatives:
-    if seq not in positives:
-        newnegs.append(seq)
-negatives = newnegs
-negatives = list(np.random.choice(negatives, 137))
+# newnegs = list() #  get rid of negatives sequences that are also postiive sequences
+# for seq in negatives:
+#     if seq not in positives:
+#         newnegs.append(seq)
+# negatives = newnegs
+# negatives = list(np.random.choice(negatives, 137))
+negatives = list(np.random.choice(set(negatives) - set(positives), 137))
 
 
 allseqs = np.append(positives,negatives) # make them all into one long sequence
@@ -40,46 +41,44 @@ output_layer_size = 1
 nnshape=[input_layer_size,hidden_layer_size,output_layer_size]
 
 alpha = 1
-kfoldsplit = 2
+kfoldsplit = 5
 
 skf = KFold(n_splits=kfoldsplit)
 count = 1   
 AUCs = list()
 print('\n########################## Learning started ##########################')
-for alpha in [1] + list(range(5,100,5)):
-    for train, test in skf.split(inputarray, outputarray):
-        print('(train, test) set %d of %d K-fold cross-validation sets:' % (count,kfoldsplit))
+for train, test in skf.split(inputarray, outputarray):
+    print('(train, test) set %d of %d K-fold cross-validation sets:' % (count,kfoldsplit))
 
-        intrain = inputarray[train] 
-        outtrain = outputarray[train]
+    intrain = inputarray[train] 
+    outtrain = outputarray[train]
 
-        intest = inputarray[test]
-        outtest = outputarray[test]
+    intest = inputarray[test]
+    outtest = outputarray[test]
 
-        parD = initialize(nnshape)
+    parD = initialize(nnshape)
 
-        batches = list(range(10,len(outtrain),10)) # train in batches of 10 
-        for iterations in tqdm(range(3000)):
-            for index, batch in enumerate(batches):
-                if index == 0:
-                    batch_intrain = intrain[:batch,:]
-                    batch_outtrain = np.matrix(outtrain[:batch]).T
-                elif batch == batches[-1]:
-                    batch_intrain = intrain[batch:,:]
-                    batch_outtrain = np.matrix(outtrain[batch:]).T
-                else:
-                    batch_intrain = intrain[batches[index-1]:batches[index],:]
-                    batch_outtrain = np.matrix(outtrain[batches[index-1]:batches[index]]).T
+    batches = list(range(10,len(outtrain),10)) # train in batches of 10 
+    for iterations in tqdm(range(3000)):
+        for index, batch in enumerate(batches):
+            if index == 0:
+                batch_intrain = intrain[:batch,:]
+                batch_outtrain = np.matrix(outtrain[:batch]).T
+            elif batch == batches[-1]:
+                batch_intrain = intrain[batch:,:]
+                batch_outtrain = np.matrix(outtrain[batch:]).T
+            else:
+                batch_intrain = intrain[batches[index-1]:batches[index],:]
+                batch_outtrain = np.matrix(outtrain[batches[index-1]:batches[index]]).T
 
-                parD = forback(parD, alpha,
-                               batch_intrain, 
-                               batch_outtrain, 
-                               nnshape)
+            parD = forback(parD, alpha,
+                           batch_intrain, 
+                           batch_outtrain, 
+                           nnshape)
 
-        AUC = testNN(intest,parD,AUC=True,y=outtest)
-        AUCs.append([alpha, AUC])
-        count += 1
-np.save("AUCs",np.array(AUCs))
+    AUC = testNN(intest,parD,AUC=True,y=outtest)
+    count += 1
+
 allseqs = seqio.getseqs("rap1-lieb-test.txt")[0]
 binarr = seqio.onehot(allseqs)
 

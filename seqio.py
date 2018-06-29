@@ -35,20 +35,11 @@ def getseqs(filenames):
 def onehot(seqs):
 
     # use one hot encoding
-    alphabet = {'A':'1000',
-                'C':'0100',
-                'G':'0010',
-                'T':'0001'}
-
-    newseqs = list()
-    for seq in seqs:
-        newseq = list()
-        for NT in seq:
-            newseq.append(alphabet[NT])
-        newseqs.append(newseq)
-    seqs = newseqs
-
-    binarr = np.zeros([len(seqs),len(seqs[0])*4])
-    for i in range(len(binarr)):
-        binarr[i,:] = list(''.join(seqs[i]))
+    alphabet = {'A': (1, 0, 0, 0), 
+                'C': (0, 1, 0, 0),
+                'G': (0, 0, 1, 0), 
+                'T': (0, 0, 0, 1)}
+    binarr = np.array([[bit for char in seq
+                        for bit in alphabet[char]]
+                        for seq in seqs], dtype=np.int)
     return(binarr)
