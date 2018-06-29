@@ -1,0 +1,14 @@
+atomicwrites==1.1.5
+attrs==18.1.0
+biopython==1.72
+more-itertools==4.2.0
+numpy==1.14.5
+pluggy==0.6.0
+pprint==0.1
+py==1.5.4
+pytest==3.6.2
+scikit-learn==0.19.1
+scipy==1.1.0
+six==1.11.0
+sklearn==0.0
+tqdm==4.23.4
