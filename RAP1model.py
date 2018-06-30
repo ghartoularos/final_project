@@ -12,14 +12,8 @@ files = ['data/rap1-lieb-positives.txt','data/yeast-upstream-1k-negative.fa']
 allfileseqs = seqio.getseqs(files) # read in all the seqeunces
 positives, negatives = allfileseqs[0], allfileseqs[1]
 
-# newnegs = list() #  get rid of negatives sequences that are also postiive sequences
-# for seq in negatives:
-#     if seq not in positives:
-#         newnegs.append(seq)
-# negatives = newnegs
-# negatives = list(np.random.choice(negatives, 137))
-negatives = list(np.random.choice(set(negatives) - set(positives), 137))
-
+#get rid of negative sequences that are also positive sequences
+negatives = list(np.random.choice(list(set(negatives) - set(positives)), 137))
 
 allseqs = np.append(positives,negatives) # make them all into one long sequence
 binarr = seqio.onehot(allseqs) # convert to binary

@@ -77,7 +77,7 @@ def testNN(x,parD,AUC=False,y='null',outreturn=False):
     for layer in range(len(nnshape)-1): # following all steps as in training, forward pass
         parD[(layer + 1,'o')] = np.dot(parD[(layer,'a')],parD[(layer,'W')])+parD[(layer,'B')]
         parD[(layer + 1,'a')] = sigmoid(parD[(layer + 1,'o')])
-    if AUC == True:
+    if AUC == True: 
         AUC = metrics.roc_auc_score(y, parD[(layer + 1,'a')])
         pprint('AUC: {:5.4f}'.format(AUC))
         return AUC
